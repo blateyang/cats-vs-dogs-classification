@@ -35,7 +35,8 @@ top_model.add(Dense(1,activation='sigmoid'))
 
 # 注意为了成功进行fine-tuning,必须从一个包括top classifier的完全训练的分类器开始
 top_model.load_weights(top_model_weights_path)
-# add the model on the top of the convolutional base
+# add the model on the top of the convolutional base 
+# 原来此处是model.add(top_model)，但由于model是函数式模型，不能像序贯模型那样直接用model.add()方法，因此此处用Model()构造函数将两个模型连接起来
 model = Model(inputs=base_model.input, outputs=top_model(base_model.output))
 
 # set the first 25 layers(up to the last conv block) to non-trainable(weights will not be updated) 
