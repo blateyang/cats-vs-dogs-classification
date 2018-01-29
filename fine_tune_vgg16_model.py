@@ -38,7 +38,8 @@ top_model.load_weights(top_model_weights_path)
 # add the model on the top of the convolutional base
 model = Model(inputs=base_model.input, outputs=top_model(base_model.output))
 
-# set the first 25 layers(up to the last conv block) to non-trainable(weights will not be updated)
+# set the first 25 layers(up to the last conv block) to non-trainable(weights will not be updated) 
+# 个人认为此处并没有25层，应该只有15层（可以从vgg16.py文件中很容易数出来）
 for layer in model.layers[:15]:
     layer.trainable = False
 # compile the model with a SGD/momentum optimizer and a very slow learning rate
