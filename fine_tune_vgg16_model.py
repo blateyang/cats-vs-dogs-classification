@@ -37,10 +37,12 @@ top_model.add(Dense(1,activation='sigmoid'))
 
 # 注意为了成功进行fine-tuning,必须从一个包括top classifier的完全训练的分类器开始
 top_model.load_weights(top_model_weights_path)
-# add the model on the top of the convolutional base
+# add the model on the top of the convolutional base 
+# 原来此处是model.add(top_model)，但由于model是函数式模型，不能像序贯模型那样直接用model.add()方法，因此此处用Model()构造函数将两个模型连接起来
 model = Model(inputs=base_model.input, outputs=top_model(base_model.output))
 
 # set the first 15 layers(up to the last conv block) to non-trainable(weights will not be updated)
+# 个人认为此处并没有25层，应该只有15层（可以从vgg16.py文件中很容易数出来）
 for layer in model.layers[:15]: # set the first 11 layers(fine tune conv4 and conv5 block can also further improve accuracy
     layer.trainable = False
 # compile the model with a SGD/momentum optimizer and a very slow learning rate
@@ -72,6 +74,7 @@ history=model.fit_generator(train_generator,
                     validation_steps=nb_validation_samples//batch_size)
 
 model.save_weights('fine_tune_vgg16_model.h5')
+<<<<<<< HEAD
 # 绘制模型到图片
 plot_model(model, to_file='total_model.png', show_shapes=True)
 # 训练过程可视化
@@ -92,3 +95,5 @@ plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='lower left')
 fig.savefig('finetune_conv4-5_dropout0.8_performance.png')
+=======
+>>>>>>> df401a45e2929fb38b9d53ad2f6b0431bf933d05
