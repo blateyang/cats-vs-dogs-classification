@@ -74,7 +74,6 @@ history=model.fit_generator(train_generator,
                     validation_steps=nb_validation_samples//batch_size)
 
 model.save_weights('fine_tune_vgg16_model.h5')
-<<<<<<< HEAD
 # 绘制模型到图片
 plot_model(model, to_file='total_model.png', show_shapes=True)
 # 训练过程可视化
@@ -95,5 +94,3 @@ plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='lower left')
 fig.savefig('finetune_conv4-5_dropout0.8_performance.png')
-=======
->>>>>>> df401a45e2929fb38b9d53ad2f6b0431bf933d05
