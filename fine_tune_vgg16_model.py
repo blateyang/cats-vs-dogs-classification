@@ -6,7 +6,9 @@ from keras.layers import Input, Dense, Flatten, Dropout
 from keras.preprocessing.image import ImageDataGenerator
 from keras import optimizers
 from vgg16 import VGG16
-import vgg16
+from keras import regularizers
+from keras.utils import plot_model
+import matplotlib.pyplot as plt
 
 # dimensions of our images.
 img_width, img_height = 150, 150
@@ -18,7 +20,7 @@ train_data_dir = 'data/train'
 validation_data_dir = 'data/validation'
 nb_train_samples = 2000
 nb_validation_samples = 800
-epochs = 2
+epochs = 50
 batch_size = 16
 
 # build the VGG16 network
@@ -30,7 +32,7 @@ print 'Model loaded.'
 top_model = Sequential()
 top_model.add(Flatten(input_shape=base_model.output_shape[1:]))
 top_model.add(Dense(256,activation='relu'))
-top_model.add(Dropout(0.5))
+top_model.add(Dropout(0.5)) # change dropout value to 0.8 can further improve accuracy 
 top_model.add(Dense(1,activation='sigmoid'))
 
 # 注意为了成功进行fine-tuning,必须从一个包括top classifier的完全训练的分类器开始
@@ -38,8 +40,8 @@ top_model.load_weights(top_model_weights_path)
 # add the model on the top of the convolutional base
 model = Model(inputs=base_model.input, outputs=top_model(base_model.output))
 
-# set the first 25 layers(up to the last conv block) to non-trainable(weights will not be updated)
-for layer in model.layers[:15]:
+# set the first 15 layers(up to the last conv block) to non-trainable(weights will not be updated)
+for layer in model.layers[:15]: # set the first 11 layers(fine tune conv4 and conv5 block can also further improve accuracy
     layer.trainable = False
 # compile the model with a SGD/momentum optimizer and a very slow learning rate
 model.compile(loss='binary_crossentropy',
@@ -63,10 +65,30 @@ test_generator = test_datagen.flow_from_directory(validation_data_dir,
                                                   class_mode='binary')
 
 # fine-tune the model
-model.fit_generator(train_generator,
+history=model.fit_generator(train_generator,
                     steps_per_epoch=nb_train_samples//batch_size,
                     epochs=epochs,
                     validation_data=test_generator,
                     validation_steps=nb_validation_samples//batch_size)
 
 model.save_weights('fine_tune_vgg16_model.h5')
+# 绘制模型到图片
+plot_model(model, to_file='total_model.png', show_shapes=True)
+# 训练过程可视化
+print(history.history.keys())
+fig = plt.figure()
+plt.subplot(121)
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.subplot(122)
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='lower left')
+fig.savefig('finetune_conv4-5_dropout0.8_performance.png')

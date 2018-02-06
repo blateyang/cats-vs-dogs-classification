@@ -4,8 +4,11 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Flatten, Dropout
 from keras.preprocessing.image import ImageDataGenerator
+from keras.utils import plot_model
+from keras import regularizers
 from vgg16 import VGG16
-import vgg16
+import matplotlib.pyplot as plt
+
 
 # dimensions of our images.
 img_width, img_height = 150, 150
@@ -62,18 +65,37 @@ def train_top_model():
     model = Sequential()
     model.add(Flatten(input_shape=train_data.shape[1:]))
     model.add(Dense(256, activation='relu'))
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.8))
     model.add(Dense(1, activation='sigmoid'))
 
     model.compile(optimizer='rmsprop',
                   loss='binary_crossentropy', metrics=['accuracy'])
 
-    model.fit(train_data, train_labels,
+    history=model.fit(train_data, train_labels,
               epochs=epochs,
               batch_size=batch_size,
               validation_data=(validation_data, validation_labels))
     model.save_weights(top_model_weights_path)
-
-
+    # 绘制模型到图片
+    plot_model(model, to_file='top_model.png', show_shapes=True)
+    # 训练过程可视化
+    print(history.history.keys())
+    fig = plt.figure()
+    plt.subplot(121)
+    plt.plot(history.history['acc'])
+    plt.plot(history.history['val_acc'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.subplot(122)
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='lower left')
+    fig.savefig('dropout0.8_performance.png')
+    
 save_bottlebeck_features()
 train_top_model()

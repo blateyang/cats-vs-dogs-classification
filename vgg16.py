@@ -164,9 +164,7 @@ def VGG16(include_top=True, weights='imagenet',
                                     WEIGHTS_PATH,
                                     cache_subdir='models')
         else:
-            weights_path = get_file('vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5',
-                                    WEIGHTS_PATH,
-                                    cache_subdir='models')
+            weights_path = '/home/ygj/EclipseWorkspace/kerasStudy/pretrainModel/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5'
         model.load_weights(weights_path)
         if K.backend() == 'theano':
             layer_utils.convert_all_kernels_in_model(model)
